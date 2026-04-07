@@ -2,13 +2,10 @@ package com.unimag.tiendauniversitaria.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+
 import org.hibernate.annotations.UpdateTimestamp;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import com.unimag.tiendauniversitaria.enums.CustomerStatus;
 
 @Data
 @Builder
