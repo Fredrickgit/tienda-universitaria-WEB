@@ -1,7 +1,6 @@
 package com.unimag.tiendauniversitaria.service;
 
 import com.unimag.tiendauniversitaria.entity.Inventory;
-import com.unimag.tiendauniversitaria.entity.Product;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +21,11 @@ public interface InventoryService {
      * Obtiene todos los inventarios con stock bajo (availableStock < minimumStock)
      */
     List<Inventory> getLowStockInventories();
+
+    /**
+     * Crea inventario inicial para un producto
+     */
+    Inventory createInventoryForProduct(Long productId, Integer initialStock, Integer minimumStock);
 
     /**
      * Actualiza el stock disponible de un producto
@@ -52,4 +56,9 @@ public interface InventoryService {
      * Obtiene el stock disponible actual de un producto
      */
     Integer getAvailableStock(Long productId);
+
+    /**
+     * Valida que el stock no sea negativo
+     */
+    void validateStockValues(Integer availableStock, Integer minimumStock);
 }
