@@ -1,9 +1,12 @@
 package com.unimag.tiendauniversitaria.service;
 
+import com.unimag.tiendauniversitaria.api.dto.InventoryDtos;
 import com.unimag.tiendauniversitaria.entity.Inventory;
 import com.unimag.tiendauniversitaria.entity.Product;
+import com.unimag.tiendauniversitaria.exception.NotFoundException;
 import com.unimag.tiendauniversitaria.repository.InventoryRepository;
 import com.unimag.tiendauniversitaria.repository.ProductRepository;
+import com.unimag.tiendauniversitaria.service.mapper.InventoryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,10 +14,47 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Service
-@RequiredArgsConstructor
-public class InventoryServiceImpl implements InventoryService {
+    @Service
+    @RequiredArgsConstructor
+    @Transactional
+    public class InventoryServiceImpl implements InventoryService {
 
+        private final InventoryRepository repo;
+        private final ProductRepository productRepo;
+
+        @Override
+        public InventoryDtos.InventoryResponse create(InventoryDtos.InventoryCreateRequest req) {
+            var product = productRepo.findById(req.productId())
+                    .orElseThrow(() -> new NotFoundException("Product %d not found".formatted(req.productId())));
+
+            var entity = InventoryMapper.toEntity(req, product);
+            var saved = repo.save(entity);
+
+            return InventoryMapper.toResponse(saved);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public InventoryDtos.InventoryResponse get(Long id) {
+            return repo.findById(id)
+                    .map(InventoryMapper::toResponse)
+                    .orElseThrow(() -> new NotFoundException("Inventory %d not found".formatted(id)));
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<InventoryDtos.InventoryResponse> list() {
+            return repo.findAll().stream()
+                    .map(InventoryMapper::toResponse)
+                    .toList();
+        }
+
+        @Override
+        public void delete(Long id) {
+            repo.deleteById(id);
+        }
+
+    /*
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
 
@@ -141,4 +181,6 @@ public class InventoryServiceImpl implements InventoryService {
             throw new IllegalArgumentException("Minimum stock cannot be negative");
         }
     }
+
+     */
 }

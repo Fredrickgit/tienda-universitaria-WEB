@@ -2,6 +2,8 @@ package com.unimag.tiendauniversitaria.api.dto;
 
 import jakarta.validation.constraints.*;
 
+import java.math.BigDecimal;
+
 public class OrderItemDtos {
     // OrderItemRequest.java
     public record OrderItemRequest(
@@ -13,7 +15,7 @@ public class OrderItemDtos {
             Long productId,
             String productName,
             Integer quantity,
-            Double price,
-            Double subtotal
+            BigDecimal price,
+            BigDecimal subtotal
     ) {}
 }

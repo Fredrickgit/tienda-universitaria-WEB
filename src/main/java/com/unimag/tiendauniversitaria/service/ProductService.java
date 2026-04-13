@@ -1,62 +1,61 @@
 package com.unimag.tiendauniversitaria.service;
 
+import com.unimag.tiendauniversitaria.api.dto.ProductDtos;
 import com.unimag.tiendauniversitaria.entity.Product;
+import org.springframework.data.domain.Page;
 
 
+import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductService {
+    ProductDtos.ProductResponse create(ProductDtos.ProductCreateRequest req);
+    ProductDtos.ProductResponse get(Long id);
+    List<ProductDtos.ProductResponse> list();
+    Page<ProductDtos.ProductResponse> list(Pageable pageable);
+    ProductDtos.ProductResponse update(Long id, ProductDtos.ProductUpdateRequest req);
+    void delete(Long id);
 
-    /**
-     * Crea un nuevo producto con validaciones de negocio
-     */
+    /*
+        ProductResponse create(ProductCreateRequest req);
+        ProductResponse get(Long id);
+        List<ProductResponse> list();
+        void delete(Long id);
+
+//     * Crea un nuevo producto con validaciones de negocio
+
     Product createProduct(String sku, String name, String description, BigDecimal price, Long categoryId);
 
-    /**
-     * Crea un nuevo producto con inventario inicial
-     */
+//     * Crea un nuevo producto con inventario inicial
+
     Product createProductWithInventory(String sku, String name, String description, BigDecimal price,
                                      Long categoryId, Integer initialStock, Integer minimumStock);
 
-    /**
-     * Busca un producto por ID
-     */
+//     * Busca un producto por ID
     Optional<Product> findById(Long id);
 
-    /**
-     * Busca un producto por SKU
-     */
+//     * Busca un producto por SKU
     Optional<Product> findBySku(String sku);
 
-    /**
-     * Verifica si existe un producto con el SKU dado
-     */
+//     * Verifica si existe un producto con el SKU dado
     boolean existsBySku(String sku);
 
-    /**
-     * Actualiza un producto existente con validaciones
-     */
+//     * Actualiza un producto existente con validaciones
     Product updateProduct(Long productId, String name, String description, BigDecimal price, Long categoryId);
 
-    /**
-     * Activa/desactiva un producto con validaciones de negocio
-     */
+//     * Activa/desactiva un producto con validaciones de negocio
     Product setProductActive(Long productId, boolean active);
 
-    /**
-     * Obtiene todos los productos
-     */
+//     * Obtiene todos los productos
     List<Product> findAll();
 
-    /**
-     * Obtiene productos por categoría
-     */
+//     * Obtiene productos por categoría
     List<Product> findByCategory(Long categoryId);
 
-    /**
-     * Obtiene productos activos
-     */
+//     * Obtiene productos activos
     List<Product> findActiveProducts();
+
+    */
 }

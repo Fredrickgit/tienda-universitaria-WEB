@@ -1,9 +1,13 @@
 package com.unimag.tiendauniversitaria.service;
 
+import com.unimag.tiendauniversitaria.api.dto.OrderDtos;
 import com.unimag.tiendauniversitaria.entity.*;
 import com.unimag.tiendauniversitaria.enums.CustomerStatus;
 import com.unimag.tiendauniversitaria.enums.OrderStatus;
+import com.unimag.tiendauniversitaria.exception.NotFoundException;
 import com.unimag.tiendauniversitaria.repository.*;
+import com.unimag.tiendauniversitaria.service.mapper.OrderItemMapper;
+import com.unimag.tiendauniversitaria.service.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +17,69 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Service
-@RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService {
+    @Service
+    @RequiredArgsConstructor
+    @Transactional
+    public class OrderServiceImpl implements OrderService {
 
+        private final OrderRepository repo;
+        private final CustomerRepository customerRepo;
+        private final ProductRepository productRepo;
+
+        @Override
+        public OrderDtos.OrderResponse create(OrderDtos.OrderCreateRequest req) {
+
+            var customer = customerRepo.findById(req.customerId())
+                    .orElseThrow(() -> new NotFoundException("Customer %d not found".formatted(req.customerId())));
+
+            var order = new Order();
+            order.setCustomer(customer);
+
+            List<OrderItem> items = new ArrayList<>();
+            BigDecimal total = BigDecimal.ZERO;
+            for (var itemReq : req.items()) {
+                var product = productRepo.findById(itemReq.productId())
+                        .orElseThrow(() -> new NotFoundException("Product %d not found".formatted(itemReq.productId())));
+
+                var item = OrderItemMapper.toEntity(itemReq, order, product);
+
+                BigDecimal subtotal = product.getPrice()
+                        .multiply(BigDecimal.valueOf(itemReq.quantity()));
+
+                total = total.add(subtotal);
+            }
+
+            order.setItems(items);
+            order.setTotal(total);
+
+            var saved = repo.save(order);
+
+            return OrderMapper.toResponse(saved);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public OrderDtos.OrderResponse get(Long id) {
+            return repo.findById(id)
+                    .map(OrderMapper::toResponse)
+                    .orElseThrow(() -> new NotFoundException("Order %d not found".formatted(id)));
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<OrderDtos.OrderResponse> list() {
+            return repo.findAll().stream()
+                    .map(OrderMapper::toResponse)
+                    .toList();
+        }
+
+        @Override
+        public void delete(Long id) {
+            repo.deleteById(id);
+        }
+
+
+    /*
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CustomerRepository customerRepository;
@@ -239,9 +302,8 @@ public class OrderServiceImpl implements OrderService {
         return orderStatusHistoryRepository.findByOrderIdOrderByChangedAtAsc(orderId);
     }
 
-    /**
-     * Registra un cambio de estado en el historial del pedido
-     */
+//     * Registra un cambio de estado en el historial del pedido
+
     private void recordStatusChange(Long orderId, OrderStatus newStatus, String notes) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order with ID " + orderId + " not found"));
@@ -258,4 +320,7 @@ public class OrderServiceImpl implements OrderService {
 
         orderStatusHistoryRepository.save(history);
     }
+
+
+     */
 }

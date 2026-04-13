@@ -1,6 +1,8 @@
 package com.unimag.tiendauniversitaria.api.dto;
 
 import jakarta.validation.constraints.*;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 public class OrderDtos {
@@ -13,6 +15,5 @@ public class OrderDtos {
             Long id,
             Long customerId,
             List<OrderItemDtos.OrderItemResponse> items,
-            Double total
-    ) {}
+            BigDecimal total    ) {}
 }
