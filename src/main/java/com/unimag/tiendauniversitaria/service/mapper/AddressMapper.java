@@ -24,4 +24,10 @@ public class AddressMapper {
                 a.getCustomer().getId()
         );
     }
+
+    public static void updateEntity(Address address, AddressDtos.AddressUpdateRequest req) {
+        address.setStreet(req.street());
+        address.setCity(req.city());
+        address.setDepartment(req.department());
+    }
 }

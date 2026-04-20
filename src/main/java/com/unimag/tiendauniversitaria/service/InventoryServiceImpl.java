@@ -8,6 +8,8 @@ import com.unimag.tiendauniversitaria.repository.InventoryRepository;
 import com.unimag.tiendauniversitaria.repository.ProductRepository;
 import com.unimag.tiendauniversitaria.service.mapper.InventoryMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,23 @@ import java.util.Optional;
             return repo.findAll().stream()
                     .map(InventoryMapper::toResponse)
                     .toList();
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<InventoryDtos.InventoryResponse> list(Pageable pageable) {
+            return repo.findAll(pageable)
+                    .map(InventoryMapper::toResponse);
+        }
+
+        @Override
+        public InventoryDtos.InventoryResponse update(Long id, InventoryDtos.InventoryUpdateRequest req) {
+            var inventory = repo.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Inventory %d not found".formatted(id)));
+
+            InventoryMapper.updateEntity(inventory, req);
+            var saved = repo.save(inventory);
+            return InventoryMapper.toResponse(saved);
         }
 
         @Override

@@ -2,12 +2,14 @@ package com.unimag.tiendauniversitaria.service;
 
 import com.unimag.tiendauniversitaria.api.dto.OrderDtos;
 import com.unimag.tiendauniversitaria.entity.*;
-import com.unimag.tiendauniversitaria.enums.CustomerStatus;
-import com.unimag.tiendauniversitaria.enums.OrderStatus;
+
 import com.unimag.tiendauniversitaria.exception.NotFoundException;
 import com.unimag.tiendauniversitaria.repository.*;
 import com.unimag.tiendauniversitaria.service.mapper.OrderItemMapper;
 import com.unimag.tiendauniversitaria.service.mapper.OrderMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.unimag.tiendauniversitaria.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
+
 
     @Service
     @RequiredArgsConstructor
@@ -71,6 +74,13 @@ import java.util.Optional;
             return repo.findAll().stream()
                     .map(OrderMapper::toResponse)
                     .toList();
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<OrderDtos.OrderResponse> list(Pageable pageable) {
+            return repo.findAll(pageable)
+                    .map(OrderMapper::toResponse);
         }
 
         @Override

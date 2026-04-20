@@ -20,4 +20,8 @@ public class InventoryMapper {
                 i.getAvailableStock()
         );
     }
+
+    public static void updateEntity(Inventory inventory, InventoryDtos.InventoryUpdateRequest req) {
+        inventory.setAvailableStock(req.quantity());
+    }
 }

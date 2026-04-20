@@ -14,4 +14,8 @@ public class CategoryMapper {
     public static CategoryDtos.CategoryResponse toResponse(Category c) {
         return new CategoryDtos.CategoryResponse(c.getId(), c.getName());
     }
+
+    public static void updateEntity(Category category, CategoryDtos.CategoryUpdateRequest req) {
+        category.setName(req.name());
+    }
 }

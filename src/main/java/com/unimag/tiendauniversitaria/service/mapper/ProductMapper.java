@@ -14,6 +14,12 @@ public class ProductMapper {
         return p;
     }
 
+    public static void updateEntity(Product product, ProductDtos.ProductUpdateRequest req, Category category) {
+        product.setName(req.name());
+        product.setPrice(req.price());
+        product.setCategory(category);
+    }
+
     public static ProductDtos.ProductResponse toResponse(Product p) {
         return new ProductDtos.ProductResponse(
                 p.getId(),

@@ -19,4 +19,9 @@ public class CustomerMapper {
                 c.getEmail()
         );
     }
+
+    public static void updateEntity(Customer customer, CustomerDtos.CustomerUpdateRequest req) {
+        customer.setFirstName(req.name());
+        customer.setEmail(req.email());
+    }
 }

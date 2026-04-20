@@ -4,9 +4,11 @@ import com.unimag.tiendauniversitaria.api.dto.CategoryDtos;
 import com.unimag.tiendauniversitaria.exception.NotFoundException;
 import com.unimag.tiendauniversitaria.repository.CategoryRepository;
 import com.unimag.tiendauniversitaria.service.mapper.CategoryMapper;
-import jakarta.transaction.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,7 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     ///readonly?
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public CategoryDtos.CategoryResponse get(Long id) {
         return repo.findById(id)
                 .map(CategoryMapper::toResponse)
@@ -34,11 +36,27 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<CategoryDtos.CategoryResponse> list() {
         return repo.findAll().stream()
                 .map(CategoryMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CategoryDtos.CategoryResponse> list(Pageable pageable) {
+        return repo.findAll(pageable)
+                .map(CategoryMapper::toResponse);
+    }
+
+    @Override
+    public CategoryDtos.CategoryResponse update(Long id, CategoryDtos.CategoryUpdateRequest req) {
+        var category = repo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Category %d not found".formatted(id)));
+        CategoryMapper.updateEntity(category, req);
+        var saved = repo.save(category);
+        return CategoryMapper.toResponse(saved);
     }
 
     @Override

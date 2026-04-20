@@ -3,6 +3,8 @@ package com.unimag.tiendauniversitaria.service;
 import com.unimag.tiendauniversitaria.api.dto.OrderDtos;
 import com.unimag.tiendauniversitaria.entity.Order;
 import com.unimag.tiendauniversitaria.entity.OrderStatusHistory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +13,7 @@ public interface OrderService {
         OrderDtos.OrderResponse create(OrderDtos.OrderCreateRequest req);
         OrderDtos.OrderResponse get(Long id);
         List<OrderDtos.OrderResponse> list();
+        Page<OrderDtos.OrderResponse> list(Pageable pageable);
         void delete(Long id);
 
     /*
