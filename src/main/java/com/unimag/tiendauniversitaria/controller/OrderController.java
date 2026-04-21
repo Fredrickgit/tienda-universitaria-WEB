@@ -1,9 +1,8 @@
 package com.unimag.tiendauniversitaria.controller;
 
 import com.unimag.tiendauniversitaria.dto.ApiResponse;
-import com.unimag.tiendauniversitaria.dto.request.OrderCreateRequest;
-import com.unimag.tiendauniversitaria.dto.response.OrderResponse;
-import com.unimag.tiendauniversitaria.dto.response.OrderStatusHistoryResponse;
+import com.unimag.tiendauniversitaria.dto.request.OrderRequest;
+import com.unimag.tiendauniversitaria.dto.response.OrderResponseDto;
 import com.unimag.tiendauniversitaria.entity.Order;
 import com.unimag.tiendauniversitaria.entity.OrderStatusHistory;
 import com.unimag.tiendauniversitaria.mapper.OrderMapper;
@@ -32,24 +31,24 @@ public class OrderController {
      * POST /api/orders
      * Crea un nuevo pedido
      *
-     * @param request DTO con customerId, addressId e items
-     * @return ResponseEntity con OrderResponse y status 201 CREATED
+     * @param request DTO con customerId e items
+     * @return ResponseEntity con OrderResponseDto y status 201 CREATED
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
-            @Valid @RequestBody OrderCreateRequest request) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> createOrder(
+            @Valid @RequestBody OrderRequest request) {
         
         // Convertir DTO request a interno de OrderService
         OrderService.CreateOrderRequest serviceRequest = new OrderService.CreateOrderRequest(
                 request.getCustomerId(),
-                request.getAddressId(),
+                null, // addressId removido del nuevo request
                 request.getItems().stream()
                         .map(item -> new OrderService.CreateOrderItemRequest(item.getProductId(), item.getQuantity()))
                         .toList()
         );
         
         Order order = orderService.createOrder(serviceRequest);
-        OrderResponse response = OrderMapper.toResponse(order);
+        OrderResponseDto response = OrderMapper.toResponse(order);
         
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -61,14 +60,14 @@ public class OrderController {
      * Obtiene un pedido por ID
      *
      * @param id ID del pedido
-     * @return ResponseEntity con OrderResponse y status 200 OK
+     * @return ResponseEntity con OrderResponseDto y status 200 OK
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<OrderResponse>> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> getOrderById(@PathVariable Long id) {
         Order order = orderService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order with ID " + id + " not found"));
         
-        OrderResponse response = OrderMapper.toResponse(order);
+        OrderResponseDto response = OrderMapper.toResponse(order);
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Order found"));
     }
 
@@ -77,14 +76,14 @@ public class OrderController {
      * Obtiene todos los pedidos de un cliente
      *
      * @param customerId ID del cliente
-     * @return ResponseEntity con lista de OrderResponse y status 200 OK
+     * @return ResponseEntity con lista de OrderResponseDto y status 200 OK
      */
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersByCustomerId(
+    public ResponseEntity<ApiResponse<List<OrderResponseDto>>> getOrdersByCustomerId(
             @PathVariable Long customerId) {
         
         List<Order> orders = orderService.findByCustomerId(customerId);
-        List<OrderResponse> responses = OrderMapper.toResponseList(orders);
+        List<OrderResponseDto> responses = OrderMapper.toResponseList(orders);
         
         return ResponseEntity.ok(ApiResponse.ofSuccess(responses, "Orders retrieved successfully"));
     }
@@ -95,12 +94,12 @@ public class OrderController {
      * Valida stock y descuenta inventario
      *
      * @param id ID del pedido
-     * @return ResponseEntity con OrderResponse actualizado
+     * @return ResponseEntity con OrderResponseDto actualizado
      */
     @PostMapping("/{id}/process-payment")
-    public ResponseEntity<ApiResponse<OrderResponse>> processPayment(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> processPayment(@PathVariable Long id) {
         Order order = orderService.processPayment(id);
-        OrderResponse response = OrderMapper.toResponse(order);
+        OrderResponseDto response = OrderMapper.toResponse(order);
         
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Payment processed successfully"));
     }
@@ -110,12 +109,12 @@ public class OrderController {
      * Despacha un pedido (PAID → SHIPPED)
      *
      * @param id ID del pedido
-     * @return ResponseEntity con OrderResponse actualizado
+     * @return ResponseEntity con OrderResponseDto actualizado
      */
     @PostMapping("/{id}/ship")
-    public ResponseEntity<ApiResponse<OrderResponse>> shipOrder(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> shipOrder(@PathVariable Long id) {
         Order order = orderService.shipOrder(id);
-        OrderResponse response = OrderMapper.toResponse(order);
+        OrderResponseDto response = OrderMapper.toResponse(order);
         
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Order shipped successfully"));
     }
@@ -125,12 +124,12 @@ public class OrderController {
      * Marca un pedido como entregado (SHIPPED → DELIVERED)
      *
      * @param id ID del pedido
-     * @return ResponseEntity con OrderResponse actualizado
+     * @return ResponseEntity con OrderResponseDto actualizado
      */
     @PostMapping("/{id}/deliver")
-    public ResponseEntity<ApiResponse<OrderResponse>> deliverOrder(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> deliverOrder(@PathVariable Long id) {
         Order order = orderService.deliverOrder(id);
-        OrderResponse response = OrderMapper.toResponse(order);
+        OrderResponseDto response = OrderMapper.toResponse(order);
         
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Order delivered successfully"));
     }
@@ -141,12 +140,12 @@ public class OrderController {
      * Si está PAID, revierte el stock
      *
      * @param id ID del pedido
-     * @return ResponseEntity con OrderResponse actualizado
+     * @return ResponseEntity con OrderResponseDto actualizado
      */
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> cancelOrder(@PathVariable Long id) {
         Order order = orderService.cancelOrder(id);
-        OrderResponse response = OrderMapper.toResponse(order);
+        OrderResponseDto response = OrderMapper.toResponse(order);
         
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Order cancelled successfully"));
     }
@@ -156,14 +155,14 @@ public class OrderController {
      * Obtiene el historial de cambios de estado de un pedido
      *
      * @param id ID del pedido
-     * @return ResponseEntity con lista de OrderStatusHistoryResponse
+     * @return ResponseEntity con lista de OrderStatusHistoryDto
      */
     @GetMapping("/{id}/history")
-    public ResponseEntity<ApiResponse<List<OrderStatusHistoryResponse>>> getOrderHistory(
+    public ResponseEntity<ApiResponse<List<OrderResponseDto.OrderStatusHistoryDto>>> getOrderHistory(
             @PathVariable Long id) {
         
         List<OrderStatusHistory> histories = orderService.getOrderHistory(id);
-        List<OrderStatusHistoryResponse> responses = OrderMapper.toStatusHistoryList(histories);
+        List<OrderResponseDto.OrderStatusHistoryDto> responses = OrderMapper.toStatusHistoryList(histories);
         
         return ResponseEntity.ok(ApiResponse.ofSuccess(responses, "Order history retrieved successfully"));
     }

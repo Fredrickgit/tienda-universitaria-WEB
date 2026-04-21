@@ -8,14 +8,18 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * DTO de respuesta para información de inventario
- * Contiene datos de stock disponible y mínimo, con fecha de actualización
+ * DTO consolidado de respuesta para operaciones de inventario
+ * Unifica InventoryResponse e InventoryDetailsResponse
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryResponse {
+public class InventoryResponseDto {
+    
+    private Long inventoryId;
+    private Long productId;
+    private String productName;
     private Integer availableStock;
     private Integer minimumStock;
     private LocalDateTime updatedAt;

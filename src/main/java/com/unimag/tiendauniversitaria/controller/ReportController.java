@@ -1,8 +1,7 @@
 package com.unimag.tiendauniversitaria.controller;
 
 import com.unimag.tiendauniversitaria.dto.ApiResponse;
-import com.unimag.tiendauniversitaria.dto.request.OrderFilterRequest;
-import com.unimag.tiendauniversitaria.dto.request.PeriodReportRequest;
+import com.unimag.tiendauniversitaria.dto.request.ReportRequest;
 import com.unimag.tiendauniversitaria.dto.response.*;
 import com.unimag.tiendauniversitaria.entity.Inventory;
 import com.unimag.tiendauniversitaria.entity.Order;
@@ -17,8 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -38,12 +35,12 @@ public class ReportController {
      * Obtiene todos los productos con stock bajo
      * Productos donde el stock disponible es menor al stock mínimo
      *
-     * @return ResponseEntity con lista de InventoryDetailsResponse con stock bajo
+     * @return ResponseEntity con lista de InventoryResponseDto con stock bajo
      */
     @GetMapping("/low-stock")
-    public ResponseEntity<ApiResponse<List<InventoryDetailsResponse>>> getLowStockProducts() {
+    public ResponseEntity<ApiResponse<List<InventoryResponseDto>>> getLowStockProducts() {
         List<Inventory> inventories = reportService.getLowStockProducts();
-        List<InventoryDetailsResponse> responses = InventoryMapper.toDetailsList(inventories);
+        List<InventoryResponseDto> responses = InventoryMapper.toResponseList(inventories);
         
         return ResponseEntity.ok(ApiResponse.ofSuccess(responses, "Low stock products report retrieved successfully"));
     }
@@ -53,12 +50,12 @@ public class ReportController {
      * Obtiene todos los productos con stock insuficiente
      * Productos que necesitan reorden urgente
      *
-     * @return ResponseEntity con lista de InventoryDetailsResponse con stock insuficiente
+     * @return ResponseEntity con lista de InventoryResponseDto con stock insuficiente
      */
     @GetMapping("/insufficient-stock")
-    public ResponseEntity<ApiResponse<List<InventoryDetailsResponse>>> getProductsWithInsufficientStock() {
+    public ResponseEntity<ApiResponse<List<InventoryResponseDto>>> getProductsWithInsufficientStock() {
         List<Inventory> inventories = reportService.getProductsWithInsufficientStock();
-        List<InventoryDetailsResponse> responses = InventoryMapper.toDetailsList(inventories);
+        List<InventoryResponseDto> responses = InventoryMapper.toResponseList(inventories);
         
         return ResponseEntity.ok(ApiResponse.ofSuccess(responses, "Insufficient stock products report retrieved successfully"));
     }
@@ -69,11 +66,11 @@ public class ReportController {
      * Permite filtrar por cliente, estado, período de tiempo y rango de totales
      *
      * @param filter DTO con criterios opcionales de filtrado
-     * @return ResponseEntity con lista de OrderResponse filtrados
+     * @return ResponseEntity con lista de OrderResponseDto filtrados
      */
     @PostMapping("/orders/filter")
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersByFilters(
-            @RequestBody OrderFilterRequest filter) {
+    public ResponseEntity<ApiResponse<List<OrderResponseDto>>> getOrdersByFilters(
+            @RequestBody ReportRequest filter) {
         
         List<Order> orders = reportService.getOrdersByFilters(
                 filter.getCustomerId(),
@@ -84,7 +81,7 @@ public class ReportController {
                 filter.getMaxTotal()
         );
         
-        List<OrderResponse> responses = OrderMapper.toResponseList(orders);
+        List<OrderResponseDto> responses = OrderMapper.toResponseList(orders);
         return ResponseEntity.ok(ApiResponse.ofSuccess(responses, "Filtered orders report retrieved successfully"));
     }
 
@@ -94,18 +91,18 @@ public class ReportController {
      * Ranking basado en cantidad de unidades vendidas
      *
      * @param request DTO con startDate y endDate del período
-     * @return ResponseEntity con lista de ProductResponse ordenados por ventas
+     * @return ResponseEntity con lista de ProductResponseDto ordenados por ventas
      */
     @PostMapping("/top-selling-products")
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getTopSellingProductsByPeriod(
-            @Valid @RequestBody PeriodReportRequest request) {
+    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getTopSellingProductsByPeriod(
+            @Valid @RequestBody ReportRequest request) {
         
         List<Product> products = reportService.getTopSellingProductsByPeriod(
                 request.getStartDate(),
                 request.getEndDate()
         );
         
-        List<ProductResponse> responses = ProductMapper.toProductList(products);
+        List<ProductResponseDto> responses = ProductMapper.toResponseList(products);
         return ResponseEntity.ok(ApiResponse.ofSuccess(responses, "Top selling products report retrieved successfully"));
     }
 
@@ -115,18 +112,18 @@ public class ReportController {
      * Permite análisis de tendencias de ingresos
      *
      * @param request DTO con startDate y endDate del período
-     * @return ResponseEntity con lista de MonthlyRevenueResponse agrupados por mes
+     * @return ResponseEntity con lista de MonthlyRevenueData agrupados por mes
      */
     @PostMapping("/monthly-revenue")
-    public ResponseEntity<ApiResponse<List<MonthlyRevenueResponse>>> getMonthlyRevenue(
-            @Valid @RequestBody PeriodReportRequest request) {
+    public ResponseEntity<ApiResponse<List<ReportResponseDto.MonthlyRevenueData>>> getMonthlyRevenue(
+            @Valid @RequestBody ReportRequest request) {
         
         List<Object[]> data = reportService.getMonthlyRevenue(
                 request.getStartDate(),
                 request.getEndDate()
         );
         
-        List<MonthlyRevenueResponse> responses = ReportMapper.toMonthlyRevenueList(data);
+        List<ReportResponseDto.MonthlyRevenueData> responses = ReportMapper.toMonthlyRevenueList(data);
         return ResponseEntity.ok(ApiResponse.ofSuccess(responses, "Monthly revenue report retrieved successfully"));
     }
 
@@ -136,18 +133,18 @@ public class ReportController {
      * Útil para identificar clientes VIP y más valiosos
      *
      * @param request DTO con startDate y endDate del período
-     * @return ResponseEntity con lista de TopCustomerRevenueResponse ordenados por ingresos
+     * @return ResponseEntity con lista de TopCustomerData ordenados por ingresos
      */
     @PostMapping("/top-customers")
-    public ResponseEntity<ApiResponse<List<TopCustomerRevenueResponse>>> getTopCustomersByRevenue(
-            @Valid @RequestBody PeriodReportRequest request) {
+    public ResponseEntity<ApiResponse<List<ReportResponseDto.TopCustomerData>>> getTopCustomersByRevenue(
+            @Valid @RequestBody ReportRequest request) {
         
         List<Object[]> data = reportService.getTopCustomersByRevenue(
                 request.getStartDate(),
                 request.getEndDate()
         );
         
-        List<TopCustomerRevenueResponse> responses = ReportMapper.toTopCustomerRevenueList(data);
+        List<ReportResponseDto.TopCustomerData> responses = ReportMapper.toTopCustomerRevenueList(data);
         return ResponseEntity.ok(ApiResponse.ofSuccess(responses, "Top customers report retrieved successfully"));
     }
 }

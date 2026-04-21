@@ -1,7 +1,6 @@
 package com.unimag.tiendauniversitaria.mapper;
 
-import com.unimag.tiendauniversitaria.dto.response.MonthlyRevenueResponse;
-import com.unimag.tiendauniversitaria.dto.response.TopCustomerRevenueResponse;
+import com.unimag.tiendauniversitaria.dto.response.ReportResponseDto;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Mapper para convertir resultados de queries personalizadas a DTOs de reportes
+ * Mapper para convertir resultados de queries personalizadas a DTOs consolidados de reportes
  * Maneja conversión de Object[] y datos agregados a estructuras tipadas
  */
 public class ReportMapper {
@@ -19,13 +18,13 @@ public class ReportMapper {
     }
 
     /**
-     * Convierte un Object[] de ingresos mensuales a MonthlyRevenueResponse
+     * Convierte un Object[] de ingresos mensuales a MonthlyRevenueData
      * Espera formato: [month (YearMonth o String), totalRevenue (BigDecimal)]
      *
      * @param data arreglo con datos de mes e ingresos
-     * @return MonthlyRevenueResponse con datos mapeados
+     * @return MonthlyRevenueData con datos mapeados
      */
-    public static MonthlyRevenueResponse toMonthlyRevenueResponse(Object[] data) {
+    public static ReportResponseDto.MonthlyRevenueData toMonthlyRevenueResponse(Object[] data) {
         if (data == null || data.length < 2) {
             return null;
         }
@@ -43,19 +42,19 @@ public class ReportMapper {
                 ? (BigDecimal) data[1] 
                 : new BigDecimal(data[1].toString());
 
-        return MonthlyRevenueResponse.builder()
+        return ReportResponseDto.MonthlyRevenueData.builder()
                 .month(month)
-                .totalRevenue(totalRevenue)
+                .revenue(totalRevenue)
                 .build();
     }
 
     /**
-     * Convierte una lista de Object[] a lista de MonthlyRevenueResponse
+     * Convierte una lista de Object[] a lista de MonthlyRevenueData
      *
      * @param dataList lista de arreglos con datos mensuales
-     * @return lista de MonthlyRevenueResponse mapeados
+     * @return lista de MonthlyRevenueData mapeados
      */
-    public static List<MonthlyRevenueResponse> toMonthlyRevenueList(List<Object[]> dataList) {
+    public static List<ReportResponseDto.MonthlyRevenueData> toMonthlyRevenueList(List<Object[]> dataList) {
         if (dataList == null) {
             return null;
         }
@@ -66,13 +65,13 @@ public class ReportMapper {
     }
 
     /**
-     * Convierte un Object[] de cliente top a TopCustomerRevenueResponse
+     * Convierte un Object[] de cliente top a TopCustomerData
      * Espera formato: [customerId (Long), customerName (String), totalRevenue (BigDecimal)]
      *
      * @param data arreglo con datos de cliente e ingresos
-     * @return TopCustomerRevenueResponse con datos mapeados
+     * @return TopCustomerData con datos mapeados
      */
-    public static TopCustomerRevenueResponse toTopCustomerRevenueResponse(Object[] data) {
+    public static ReportResponseDto.TopCustomerData toTopCustomerRevenueResponse(Object[] data) {
         if (data == null || data.length < 3) {
             return null;
         }
@@ -87,20 +86,20 @@ public class ReportMapper {
                 ? (BigDecimal) data[2] 
                 : new BigDecimal(data[2].toString());
 
-        return TopCustomerRevenueResponse.builder()
+        return ReportResponseDto.TopCustomerData.builder()
                 .customerId(customerId)
                 .customerName(customerName)
-                .totalRevenue(totalRevenue)
+                .totalSpent(totalRevenue)
                 .build();
     }
 
     /**
-     * Convierte una lista de Object[] a lista de TopCustomerRevenueResponse
+     * Convierte una lista de Object[] a lista de TopCustomerData
      *
      * @param dataList lista de arreglos con datos de clientes top
-     * @return lista de TopCustomerRevenueResponse mapeados
+     * @return lista de TopCustomerData mapeados
      */
-    public static List<TopCustomerRevenueResponse> toTopCustomerRevenueList(List<Object[]> dataList) {
+    public static List<ReportResponseDto.TopCustomerData> toTopCustomerRevenueList(List<Object[]> dataList) {
         if (dataList == null) {
             return null;
         }

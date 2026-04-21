@@ -1,9 +1,6 @@
 package com.unimag.tiendauniversitaria.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,14 +9,14 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * DTO de solicitud para crear un nuevo producto
- * Incluye validaciones de negocio en los campos
+ * DTO consolidado para operaciones de productos
+ * Maneja: crear, actualizar y crear con inventario
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductCreateRequest {
+public class ProductRequest {
 
     @NotBlank(message = "SKU is required")
     @Size(max = 50, message = "SKU must not exceed 50 characters")
@@ -38,4 +35,23 @@ public class ProductCreateRequest {
 
     @NotNull(message = "Category ID is required")
     private Long categoryId;
+
+    // Para crear producto con inventario
+    @PositiveOrZero(message = "Initial stock must be greater than or equal to zero")
+    private Integer initialStock;
+
+    @PositiveOrZero(message = "Minimum stock must be greater than or equal to zero")
+    private Integer minimumStock;
+
+    /**
+     * Tipo de operación: CREATE, UPDATE, CREATE_WITH_INVENTORY
+     */
+    @NotNull(message = "Operation type is required")
+    private ProductOperationType operationType;
+
+    public enum ProductOperationType {
+        CREATE,
+        UPDATE,
+        CREATE_WITH_INVENTORY
+    }
 }

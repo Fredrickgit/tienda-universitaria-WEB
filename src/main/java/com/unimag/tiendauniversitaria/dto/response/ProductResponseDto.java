@@ -9,22 +9,25 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * DTO de respuesta para producto
- * Contiene todos los datos del producto incluyendo categoría e inventario
+ * DTO consolidado de respuesta para operaciones de productos
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductResponse {
-    private Long id;
+public class ProductResponseDto {
+    
+    private Long productId;
     private String sku;
     private String name;
     private String description;
     private BigDecimal price;
-    private Boolean active;
     private Long categoryId;
     private String categoryName;
-    private InventoryResponse inventory;
+    
+    // Información de inventario (cuando aplique)
+    private Integer availableStock;
+    private Integer minimumStock;
+    
     private LocalDateTime createdAt;
 }

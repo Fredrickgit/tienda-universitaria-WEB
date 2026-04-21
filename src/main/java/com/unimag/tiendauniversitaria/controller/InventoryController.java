@@ -1,12 +1,8 @@
 package com.unimag.tiendauniversitaria.controller;
 
 import com.unimag.tiendauniversitaria.dto.ApiResponse;
-import com.unimag.tiendauniversitaria.dto.request.InventoryCreateRequest;
-import com.unimag.tiendauniversitaria.dto.request.InventoryDecrementStockRequest;
-import com.unimag.tiendauniversitaria.dto.request.InventoryIncrementStockRequest;
-import com.unimag.tiendauniversitaria.dto.request.InventoryUpdateAvailableStockRequest;
-import com.unimag.tiendauniversitaria.dto.request.InventoryUpdateMinimumStockRequest;
-import com.unimag.tiendauniversitaria.dto.response.InventoryDetailsResponse;
+import com.unimag.tiendauniversitaria.dto.request.InventoryRequest;
+import com.unimag.tiendauniversitaria.dto.response.InventoryResponseDto;
 import com.unimag.tiendauniversitaria.entity.Inventory;
 import com.unimag.tiendauniversitaria.mapper.InventoryMapper;
 import com.unimag.tiendauniversitaria.service.InventoryService;
@@ -34,11 +30,11 @@ public class InventoryController {
      * Crea inventario inicial para un producto
      *
      * @param request DTO con productId, initialStock y minimumStock
-     * @return ResponseEntity con InventoryDetailsResponse y status 201 CREATED
+     * @return ResponseEntity con InventoryResponseDto y status 201 CREATED
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<InventoryDetailsResponse>> createInventory(
-            @Valid @RequestBody InventoryCreateRequest request) {
+    public ResponseEntity<ApiResponse<InventoryResponseDto>> createInventory(
+            @Valid @RequestBody InventoryRequest request) {
         
         Inventory inventory = inventoryService.createInventoryForProduct(
                 request.getProductId(),
@@ -46,7 +42,7 @@ public class InventoryController {
                 request.getMinimumStock()
         );
         
-        InventoryDetailsResponse response = InventoryMapper.toDetailsResponse(inventory);
+        InventoryResponseDto response = InventoryMapper.toResponse(inventory);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.ofSuccess(response, "Inventory created successfully"));
@@ -57,16 +53,16 @@ public class InventoryController {
      * Obtiene el inventario de un producto por su ID
      *
      * @param productId ID del producto
-     * @return ResponseEntity con InventoryDetailsResponse y status 200 OK
+     * @return ResponseEntity con InventoryResponseDto y status 200 OK
      */
     @GetMapping("/product/{productId}")
-    public ResponseEntity<ApiResponse<InventoryDetailsResponse>> getInventoryByProductId(
+    public ResponseEntity<ApiResponse<InventoryResponseDto>> getInventoryByProductId(
             @PathVariable Long productId) {
         
         Inventory inventory = inventoryService.findByProductId(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Inventory not found for product ID: " + productId));
         
-        InventoryDetailsResponse response = InventoryMapper.toDetailsResponse(inventory);
+        InventoryResponseDto response = InventoryMapper.toResponse(inventory);
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Inventory found"));
     }
 
@@ -75,16 +71,16 @@ public class InventoryController {
      * Obtiene el inventario de un producto por SKU
      *
      * @param sku SKU del producto
-     * @return ResponseEntity con InventoryDetailsResponse y status 200 OK
+     * @return ResponseEntity con InventoryResponseDto y status 200 OK
      */
     @GetMapping("/sku/{sku}")
-    public ResponseEntity<ApiResponse<InventoryDetailsResponse>> getInventoryByProductSku(
+    public ResponseEntity<ApiResponse<InventoryResponseDto>> getInventoryByProductSku(
             @PathVariable String sku) {
         
         Inventory inventory = inventoryService.findByProductSku(sku)
                 .orElseThrow(() -> new IllegalArgumentException("Inventory not found for product SKU: " + sku));
         
-        InventoryDetailsResponse response = InventoryMapper.toDetailsResponse(inventory);
+        InventoryResponseDto response = InventoryMapper.toResponse(inventory);
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Inventory found"));
     }
 
@@ -92,12 +88,12 @@ public class InventoryController {
      * GET /api/inventories/low-stock
      * Obtiene todos los inventarios con stock bajo
      *
-     * @return ResponseEntity con lista de InventoryDetailsResponse con stock bajo
+     * @return ResponseEntity con lista de InventoryResponseDto con stock bajo
      */
     @GetMapping("/low-stock")
-    public ResponseEntity<ApiResponse<List<InventoryDetailsResponse>>> getLowStockInventories() {
+    public ResponseEntity<ApiResponse<List<InventoryResponseDto>>> getLowStockInventories() {
         List<Inventory> inventories = inventoryService.getLowStockInventories();
-        List<InventoryDetailsResponse> responses = InventoryMapper.toDetailsList(inventories);
+        List<InventoryResponseDto> responses = InventoryMapper.toResponseList(inventories);
         return ResponseEntity.ok(ApiResponse.ofSuccess(responses, "Low stock inventories retrieved successfully"));
     }
 
@@ -106,16 +102,16 @@ public class InventoryController {
      * Actualiza el stock disponible de un producto
      *
      * @param productId ID del producto
-     * @param request DTO con newStock
-     * @return ResponseEntity con InventoryDetailsResponse actualizado
+     * @param request DTO con availableStock
+     * @return ResponseEntity con InventoryResponseDto actualizado
      */
     @PutMapping("/product/{productId}/available-stock")
-    public ResponseEntity<ApiResponse<InventoryDetailsResponse>> updateAvailableStock(
+    public ResponseEntity<ApiResponse<InventoryResponseDto>> updateAvailableStock(
             @PathVariable Long productId,
-            @Valid @RequestBody InventoryUpdateAvailableStockRequest request) {
+            @Valid @RequestBody InventoryRequest request) {
         
-        Inventory inventory = inventoryService.updateAvailableStock(productId, request.getNewStock());
-        InventoryDetailsResponse response = InventoryMapper.toDetailsResponse(inventory);
+        Inventory inventory = inventoryService.updateAvailableStock(productId, request.getAvailableStock());
+        InventoryResponseDto response = InventoryMapper.toResponse(inventory);
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Available stock updated successfully"));
     }
 
@@ -124,16 +120,16 @@ public class InventoryController {
      * Actualiza el stock mínimo de un producto
      *
      * @param productId ID del producto
-     * @param request DTO con newMinimumStock
-     * @return ResponseEntity con InventoryDetailsResponse actualizado
+     * @param request DTO con minimumStock
+     * @return ResponseEntity con InventoryResponseDto actualizado
      */
     @PutMapping("/product/{productId}/minimum-stock")
-    public ResponseEntity<ApiResponse<InventoryDetailsResponse>> updateMinimumStock(
+    public ResponseEntity<ApiResponse<InventoryResponseDto>> updateMinimumStock(
             @PathVariable Long productId,
-            @Valid @RequestBody InventoryUpdateMinimumStockRequest request) {
+            @Valid @RequestBody InventoryRequest request) {
         
-        Inventory inventory = inventoryService.updateMinimumStock(productId, request.getNewMinimumStock());
-        InventoryDetailsResponse response = InventoryMapper.toDetailsResponse(inventory);
+        Inventory inventory = inventoryService.updateMinimumStock(productId, request.getMinimumStock());
+        InventoryResponseDto response = InventoryMapper.toResponse(inventory);
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Minimum stock updated successfully"));
     }
 
@@ -143,15 +139,15 @@ public class InventoryController {
      *
      * @param productId ID del producto
      * @param request DTO con quantity a incrementar
-     * @return ResponseEntity con InventoryDetailsResponse actualizado
+     * @return ResponseEntity con InventoryResponseDto actualizado
      */
     @PostMapping("/product/{productId}/increment")
-    public ResponseEntity<ApiResponse<InventoryDetailsResponse>> incrementStock(
+    public ResponseEntity<ApiResponse<InventoryResponseDto>> incrementStock(
             @PathVariable Long productId,
-            @Valid @RequestBody InventoryIncrementStockRequest request) {
+            @Valid @RequestBody InventoryRequest request) {
         
         Inventory inventory = inventoryService.incrementStock(productId, request.getQuantity());
-        InventoryDetailsResponse response = InventoryMapper.toDetailsResponse(inventory);
+        InventoryResponseDto response = InventoryMapper.toResponse(inventory);
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Stock incremented successfully"));
     }
 
@@ -161,15 +157,15 @@ public class InventoryController {
      *
      * @param productId ID del producto
      * @param request DTO con quantity a decrementar
-     * @return ResponseEntity con InventoryDetailsResponse actualizado
+     * @return ResponseEntity con InventoryResponseDto actualizado
      */
     @PostMapping("/product/{productId}/decrement")
-    public ResponseEntity<ApiResponse<InventoryDetailsResponse>> decrementStock(
+    public ResponseEntity<ApiResponse<InventoryResponseDto>> decrementStock(
             @PathVariable Long productId,
-            @Valid @RequestBody InventoryDecrementStockRequest request) {
+            @Valid @RequestBody InventoryRequest request) {
         
         Inventory inventory = inventoryService.decrementStock(productId, request.getQuantity());
-        InventoryDetailsResponse response = InventoryMapper.toDetailsResponse(inventory);
+        InventoryResponseDto response = InventoryMapper.toResponse(inventory);
         return ResponseEntity.ok(ApiResponse.ofSuccess(response, "Stock decremented successfully"));
     }
 
